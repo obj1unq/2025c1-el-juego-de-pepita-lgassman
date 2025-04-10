@@ -1,7 +1,11 @@
 import wollok.game.*
 import pepita.*
 object nido {
-    const property position = game.at(7,8)
+    const position = game.at(7,8)
+
+    method position () {
+        return position
+    }
 
     method image(){
         return "nido.png"
@@ -10,12 +14,14 @@ object nido {
 }
 
 object silvestre{
-    const presa = pepita 
+
+    var property presa = pepita
 
     method image(){
         return "silvestre.png"
     }
+
     method position(){
-        return game.at(presa.position().x().max(3),0)
+        return game.at(presa.position().x() , 0)  
     }
 }
