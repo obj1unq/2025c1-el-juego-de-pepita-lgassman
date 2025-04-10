@@ -1,48 +1,70 @@
 import wollok.game.*
-import posiciones.*
 import extras.*
+
 object pepita {
 	var energia = 100
-	var property position = game.at(3,5)
-	const destino = nido
-	const cazador = silvestre
-
+	var position = game.at(8, 2)
+	var property destino = nido
+	var property cazador = silvestre
+	
 	method comer(comida) {
 		energia += comida.energiaQueOtorga()
 	}
-	
+
 	method volar(kms) {
-		energia = (energia - 10) - kms
+		energia = energia - 8 - kms
+	}
+	
+	method position() = position
+	
+	method position(_position) {
+		position = _position
 	}
 	
 	method energia() = energia
 	
-	method image(){
-		return "pepita" + self.estado() + ".png"
+	method image() = ("pepita-" + self.estado()) + ".png"
 
+	method text() { //RGBA (opcional)
+		return energia.toString()
 	}
 
-	method estado(){
-		return if (self.estaEnDestino()){
-			"-grande"
-		} else if (self.estaAtrapada()){
-			"-gris"
-		} else {
-			""
-		}
+	method textColor() {
+		return "FF0000FF" //RGBA (opcional)
 	}
 	
-	//method text() = (("x: " + position.x()) + " y: ") + position.y()
+	method estado()  {
+		return if (self.enDestino()) {
+				"destino"
+			} else {
+				if (self.atrapada()) { 
+					"atrapada" 
+				} else { 
+					"afuera"
+				}
+			}
+	}
 	
-	method mover(direccion) {
-		position = direccion.siguiente(self.position())
+	method atrapada() = self.position() == cazador.position()
+	
+	method enDestino() = self.position() == destino.position()
+
+	method moverArriba() {
+		self.volar(1)
+		position = game.at(position.x(), position.y() + 1)
+	}
+	method moverAbajo() {
+		self.volar(1)
+		position = game.at(position.x(), position.y() - 1)
+	}
+	method moverDerecha() {
+		self.volar(1)
+		position = game.at(position.x()+1, position.y())
 	}
 
-	method estaEnDestino(){
-		return position == destino.position()
+	method moverIzquierda() {
+		self.volar(1)
+		position = game.at(position.x()-1, position.y())
 	}
 
-	method estaAtrapada(){
-		return position == cazador.position()
-	}
 }
