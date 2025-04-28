@@ -19,5 +19,10 @@ program pepitaGame {
 	keyboard.left().onPressDo({pepita.moverIzquierda()})
 	keyboard.down().onPressDo({pepita.moverAbajo()})
 	keyboard.right().onPressDo({pepita.moverDerecha()})
+	
+	//keyboard.c().onPressDo({ game.stop() })
+
 	game.start()	
+
+	
 }
