@@ -22,6 +22,11 @@ object silvestre{
     }
 
     method position(){
-        return game.at(presa.position().x() , 0)  
+        return game.at(self.xLimitado(), 0)  
     }
+
+    method xLimitado(){
+        return 3.max(presa.xPosicion())
+    }
+
 }
