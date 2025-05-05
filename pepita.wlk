@@ -1,6 +1,49 @@
 import wollok.game.*
 import extras.*
 import direcciones.*
+import comidas.*
+
+object nivel{
+	const comidas = #{alpiste, manzana} 
+	
+	method configurarTablero(){
+		game.title("Pepita") 	//Valor por defecto "Wollok Game"
+		game.height(10) 		//valor por defecto 5
+		game.width(10) 			//valor por defecto 5
+		game.cellSize(50) 		//valor por defecto 50
+		//search assets in assets folder, for example, for the background
+		//game.ground("fondo.jpg") //Este pone la imagen de fondo en cada celda.
+		game.boardGround("fondo.jpg")
+	}
+
+	method finalizar(){
+		game.schedule(2000, { game.stop() })
+	}
+
+	method configurar(){
+		comidas.forEach({ comida => comida.configurar()})
+		game.onTick(800,"gravedad" + pepita.identity(), { pepita.aplicarGravedad()}) //` para agregar gravedad, haciendo que pepita pierda altura cada 800
+	}
+	
+	method existe(posicion)	{
+		return self.existeX(posicion.x()) && self.existeY(posicion.y())
+	}
+
+	method enLimite(coord, max){
+		return coord.between(0, max - 1) 
+	}
+
+	method existeX(x){
+		return self.enLimite(x, game.width())
+		// x >= 0 && x <= game.width() - 1
+	} 
+
+	method existeY(y){
+		return self.enLimite(y, game.height())
+		//y.between(0, game.height() - 1) 
+		// x >= 0 && x <= game.width() - 1
+	} 
+}
 
 object pepita {
 	var energia = 100
@@ -11,6 +54,7 @@ object pepita {
 	
 	method comerEnLugar(){
 		const cosaEnPosicion = self.cosaEnPosicion()
+		
 		self.comer(cosaEnPosicion)
 		cosaEnPosicion.cambiarPosicion()
     }
@@ -59,6 +103,10 @@ object pepita {
 		return energia.toString()
 	}
 
+	method progresar(){
+		estado.progresar(self)
+	}
+
 	method textColor() {
 		return "FF0000FF" //RGBA (opcional)
 	}
@@ -69,23 +117,20 @@ object pepita {
 
 	method mover(direccion){
 		//self.error(estado.mensajeMover())
-		if(self.puedeMover()){
-			self.validarMover(direccion)
-			self.volar(1)
-			position = direccion.siguientePosicion(position)
-			estado.actualizar(self)	
-		}
-		
+		self.validarMover(direccion)
+		self.volar(1)
+		position = direccion.siguientePosicion(position)
+		estado.actualizar(self)	
 	}
 
 	method validarMover(direccion){
-		if(not self.puedeMover()){
-			self.error(estado.mensajeMover())
+		if(not self.puedeMover(direccion)){
+			self.error(estado.mensaje() + " o está fuera del mapa!")
 		}
 	}
 
-	method puedeMover(){
-		return estado.puedeMover()
+	method puedeMover(direccion){
+		return estado.puedeMover() && nivel.existe(direccion.siguientePosicion(position))
 	}
 
 	method esDebil(){
@@ -98,6 +143,18 @@ object pepita {
 
 	method energiaNecesaria(kms){
 		return 8 + kms
+	}
+
+	method finalizar(){
+		game.say(self, estado.mensaje())
+		nivel.finalizar()
+	}
+
+	method aplicarGravedad(){
+		const siguiente = abajo.siguientePosicion(position)
+		if(nivel.existe(siguiente)){
+			position = abajo.siguientePosicion(position)
+		}
 	}
 }
 
@@ -112,6 +169,11 @@ object afuera{
 		} else { 
 			self.verSidebilOAtrapada(ave)
 		}
+		ave.progresar()
+	}
+
+	method progresar(ave){
+
 	}
 
 	method puedeMover(){
@@ -142,8 +204,12 @@ object ganadora{
 		return false
 	}	
 
-	method mensajeMover(){
+	method mensaje(){
 		return "Ya gané!!!"
+	}
+
+	method progresar(ave){
+		ave.finalizar()	
 	}
 }
 
@@ -181,7 +247,11 @@ object debil{
 		return false
 	}	
 
-	method mensajeMover(){
+	method mensaje(){
 		return "Estoy debil!!!"
+	}
+
+	method progresar(ave){
+		ave.finalizar()	
 	}
 }

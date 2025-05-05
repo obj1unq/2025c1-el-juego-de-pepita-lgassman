@@ -6,25 +6,18 @@ import extras.*
 import direcciones.*
 
 program pepitaGame {
-	game.title("Pepita") 	//Valor por defecto "Wollok Game"
-	game.height(10) 		//valor por defecto 5
-	game.width(10) 			//valor por defecto 5
-	game.cellSize(50) 		//valor por defecto 50
-	//search assets in assets folder, for example, for the background
-	//game.ground("fondo.jpg") //Este pone la imagen de fondo en cada celda.
-	game.boardGround("fondo.jpg")
+	nivel.configurarTablero()
 
 	game.addVisual(nido)
 	game.addVisual(silvestre)
-	alpiste.configurar()
-	manzana.configurar()
+	nivel.configurar()
 	game.addVisual(pepita)
 
 	keyboard.up().onPressDo({pepita.mover(arriba)})	
 	keyboard.left().onPressDo({pepita.mover(izquierda)})
 	keyboard.down().onPressDo({pepita.mover(abajo)})
 	keyboard.right().onPressDo({pepita.mover(derecha)})
-	keyboard.c().onPressDo({pepita.comerEnLugar()})
+	keyboard.c().onPressDo({pepita.comerEnLugar()}) // pepita.comer(game.uniqueCollider(pepita))
 
 /*
 	keyboard.j().onPressDo({ game.removeVisual(pepita)
@@ -32,7 +25,7 @@ program pepitaGame {
 */	
 	//keyboard.c().onPressDo({ game.stop() })
 
-	game.start()	
+   	game.start()	
 
 	
 }
