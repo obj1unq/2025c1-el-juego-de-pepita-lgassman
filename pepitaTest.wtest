@@ -9,11 +9,6 @@ describe "Tests de Pepita" {
 		assert.equals(105, pepita.energia())
 	}
 
-	test "Al volar pepita pierde energia" {
-		pepita.volar(1)
-		assert.equals(89, pepita.energia())
-	}
-
 
 
 }

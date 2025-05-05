@@ -1,0 +1,31 @@
+import wollok.game.*
+
+import pepita.*
+import comidas.*
+import extras.*
+import direcciones.*
+
+program pepitaGame {
+	nivel.configurarTablero()
+
+	game.addVisual(nido)
+	game.addVisual(silvestre)
+	nivel.configurar()
+	game.addVisual(pepita)
+
+	keyboard.up().onPressDo({pepita.mover(arriba)})	
+	keyboard.left().onPressDo({pepita.mover(izquierda)})
+	keyboard.down().onPressDo({pepita.mover(abajo)})
+	keyboard.right().onPressDo({pepita.mover(derecha)})
+	keyboard.c().onPressDo({pepita.comerEnLugar()}) // pepita.comer(game.uniqueCollider(pepita))
+
+/*
+	keyboard.j().onPressDo({ game.removeVisual(pepita)
+							 game.addVisual(pepita)})
+*/	
+	//keyboard.c().onPressDo({ game.stop() })
+
+   	game.start()	
+
+	
+}
