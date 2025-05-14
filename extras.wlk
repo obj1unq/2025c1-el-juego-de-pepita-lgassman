@@ -1,6 +1,14 @@
 import wollok.game.*
 import pepita.*
-object nido {
+
+
+class Visual {
+    method atravesable() {
+        return true
+    }
+}
+
+object nido inherits Visual {
     const position = game.at(7,8)
 
     method position () {
@@ -18,7 +26,7 @@ object nido {
 
 }
 
-object silvestre{
+object silvestre inherits Visual {
 
     var property presa = pepita
 
@@ -38,6 +46,15 @@ object silvestre{
         ave.cambiarEstado(atrapada)
     }
 
+}
 
+class Muro inherits Visual {
+
+    method image() = "muro.png"
+    const property position = game.origin()
+
+    override method atravesable() {
+        return false
+    }
 
 }

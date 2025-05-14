@@ -22,6 +22,9 @@ object nivel{
 	method configurar(){
 		game.onTick(800,self.nombreEventoGravedad(), { pepita.aplicarGravedad()}) //` para agregar gravedad, haciendo que pepita pierda altura cada 800
 		comidas.configurar()
+		game.addVisual(new Muro(position = game.at(5,5)))
+		game.addVisual(new Muro(position = game.at(6,5)))
+		game.addVisual(new Muro(position = game.at(7,5)))
 	}
 
 	method removerGravedad() {
@@ -49,6 +52,14 @@ object nivel{
 		//y.between(0, game.height() - 1) 
 		// x >= 0 && x <= game.width() - 1
 	} 
+
+	method puedeIr(position) {
+		return self.existe(position) and self.esAtravesable(position)
+	}
+
+	method esAtravesable(position) {
+		return game.getObjectsIn(position).copyWithout(pepita).all({visual => visual.atravesable()})
+	}
 }
 
 object pepita {
@@ -114,13 +125,23 @@ object pepita {
 	
 	method enDestino() = self.position() == destino.position()
 
+	method debeIgnorarMovimiento(proximaPosicion) {
+		return not nivel.puedeIr(proximaPosicion) 
+	}
 	method mover(direccion){
-		self.validarMover(direccion)
-		self.volar(1)
-		position = direccion.siguientePosicion(position)
-		if(not self.puedeVolar()){
-			self.cambiarEstado(debil)
-		}	
+		const proximaPosicion = direccion.siguientePosicion(position)
+		if (not self.debeIgnorarMovimiento(proximaPosicion))  { 
+			// Este tipo de if es solo por la naturaleza del juego,
+			// no quiero una excepcion acá por jugabilidad
+			// Otro tipo de acción si conviene que esta condicion se evalue 
+			//una validacion
+			self.validarMover(direccion)
+			self.volar(1)
+			position = proximaPosicion
+			if(not self.puedeVolar()){
+				self.cambiarEstado(debil)
+			}	
+		}
 	}
 
 	method validarMover(direccion){
@@ -142,8 +163,8 @@ object pepita {
 
 	method aplicarGravedad(){
 		const siguiente = abajo.siguientePosicion(position)
-		if(nivel.existe(siguiente)){
-			position = abajo.siguientePosicion(position)
+		if(not self.debeIgnorarMovimiento(siguiente)){
+			position = siguiente
 		}
 	}
 
@@ -182,16 +203,6 @@ object afuera inherits Estado{
 
 	override method progresar(ave){
 	}
-
-	override method validarMover(ave, direccion){
-		super(ave, direccion)
-		const destino = direccion.siguientePosicion(ave.position())
-		if (not nivel.existe(destino)) {
-			ave.error("No voy a salir de la pantalla")
-		}
-	}
-
-
 
 	override method puedeMover(ave){
 		return ave.puedeVolar() 

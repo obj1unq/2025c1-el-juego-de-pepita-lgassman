@@ -1,9 +1,11 @@
 import wollok.game.*
 import randomizer.*
+import extras.*
 
 object comidas {
 
 	const todas = #{}
+	const factories = [manzanaFactory, alpisteFactory]
 
 	method configurar() {
 		game.onTick(3000, self.nombreEventoNuevaComida(), {self.nuevaComida()})
@@ -23,7 +25,7 @@ object comidas {
 	}
 
 	method nuevaComida() {
-		const comida = new Manzana(position = randomizer.emptyPosition())
+		const comida = self.construirComida()
 		game.addVisual(comida)
 		todas.add(comida)
 	}
@@ -31,9 +33,25 @@ object comidas {
 		todas.remove(comida)
 		game.removeVisual(comida)
 	}
+
+	method construirComida() {
+		return factories.anyOne().nueva()
+	}
 }
 
-class Alimento {
+object manzanaFactory {
+	method nueva() {
+		return new Manzana(position = randomizer.emptyPosition())
+	}
+}
+object alpisteFactory {
+	method nueva() {
+		return new Alpiste(position = randomizer.emptyPosition(), peso = (1..20).anyOne() )
+	}
+
+}
+
+class Alimento inherits Visual {
 	method colision(ave) {
         ave.comer(self)
 		comidas.remover(self)
@@ -81,13 +99,14 @@ class Manzana inherits Alimento {
 
 class Alpiste inherits Alimento {
 	var property position = game.origin()
+	const peso = 20
 
 	method image(){
 		return "alpiste.png"
 	}
 
 	override method energiaQueOtorga() {
-		return 20
+		return peso
 	} 
 
 }
