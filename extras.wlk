@@ -11,6 +11,11 @@ object nido {
         return "nido.png"
     }
 
+    method colision(ave) {
+        ave.cambiarEstado(ganadora)
+    }
+
+
 }
 
 object silvestre{
@@ -28,5 +33,11 @@ object silvestre{
     method xLimitado(){
         return 3.max(presa.xPosicion())
     }
+
+    method colision(ave) {
+        ave.cambiarEstado(atrapada)
+    }
+
+
 
 }

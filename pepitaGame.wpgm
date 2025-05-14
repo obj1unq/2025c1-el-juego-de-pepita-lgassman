@@ -17,7 +17,9 @@ program pepitaGame {
 	keyboard.left().onPressDo({pepita.mover(izquierda)})
 	keyboard.down().onPressDo({pepita.mover(abajo)})
 	keyboard.right().onPressDo({pepita.mover(derecha)})
-	keyboard.c().onPressDo({pepita.comerEnLugar()}) // pepita.comer(game.uniqueCollider(pepita))
+
+	game.onCollideDo(pepita, { algo => algo.colision(pepita) } )
+
 
 /*
 	keyboard.j().onPressDo({ game.removeVisual(pepita)

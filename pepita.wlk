@@ -3,9 +3,7 @@ import extras.*
 import direcciones.*
 import comidas.*
 
-object nivel{
-	const comidas = #{alpiste, manzana} 
-	
+object nivel{	
 	method configurarTablero(){
 		game.title("Pepita") 	//Valor por defecto "Wollok Game"
 		game.height(10) 		//valor por defecto 5
@@ -17,12 +15,20 @@ object nivel{
 	}
 
 	method finalizar(){
+		self.removerGravedad()
 		game.schedule(2000, { game.stop() })
 	}
 
 	method configurar(){
-		comidas.forEach({ comida => comida.configurar()})
-		game.onTick(800,"gravedad" + pepita.identity(), { pepita.aplicarGravedad()}) //` para agregar gravedad, haciendo que pepita pierda altura cada 800
+		game.onTick(800,self.nombreEventoGravedad(), { pepita.aplicarGravedad()}) //` para agregar gravedad, haciendo que pepita pierda altura cada 800
+		comidas.configurar()
+	}
+
+	method removerGravedad() {
+		game.removeTickEvent(self.nombreEventoGravedad())
+	}
+	method nombreEventoGravedad() {
+		return "gravedad" + self.identity()
 	}
 	
 	method existe(posicion)	{
@@ -46,18 +52,11 @@ object nivel{
 }
 
 object pepita {
-	var energia = 100
-	var position = game.at(8, 2)
+	var energia = 300
+	var position = game.at(0, 2)
 	var property destino = nido
 	var property cazador = silvestre
 	var estado = afuera
-	
-	method comerEnLugar(){
-		const cosaEnPosicion = self.cosaEnPosicion()
-		
-		self.comer(cosaEnPosicion)
-		cosaEnPosicion.cambiarPosicion()
-    }
 	
 	method comer(comida) {
 		energia += comida.energiaQueOtorga()
@@ -92,7 +91,7 @@ object pepita {
 	}
 
 	method puedeVolar() {
-		return true
+		return energia >= self.energiaNecesaria(1)
 	}
 
 	method mensajeError(){ 
@@ -116,25 +115,16 @@ object pepita {
 	method enDestino() = self.position() == destino.position()
 
 	method mover(direccion){
-		//self.error(estado.mensajeMover())
 		self.validarMover(direccion)
 		self.volar(1)
 		position = direccion.siguientePosicion(position)
-		estado.actualizar(self)	
+		if(not self.puedeVolar()){
+			self.cambiarEstado(debil)
+		}	
 	}
 
 	method validarMover(direccion){
-		if(not self.puedeMover(direccion)){
-			self.error(estado.mensaje() + " o está fuera del mapa!")
-		}
-	}
-
-	method puedeMover(direccion){
-		return estado.puedeMover() && nivel.existe(direccion.siguientePosicion(position))
-	}
-
-	method esDebil(){
-		return energia <= 0
+		estado.validarMover(self, direccion)
 	}
 
 	method estado(_estado){
@@ -156,102 +146,92 @@ object pepita {
 			position = abajo.siguientePosicion(position)
 		}
 	}
+
+	method cambiarEstado(_estado) {
+		estado = _estado
+		estado.progresar(self)
+	}
+
 }
 
-object afuera{
-	method nombreImagen(){
+class Estado {
+	method nombreImagen()
+	method mensaje()
+
+	method progresar(ave){
+		ave.finalizar()
+	}
+	method puedeMover(ave) {
+		return false
+	}
+	
+	method validarMover(ave, direccion){
+		if (not self.puedeMover(ave) )
+			ave.error(self.mensaje())
+	}
+
+
+}
+
+
+object afuera inherits Estado{
+
+	override method nombreImagen(){
 		return "afuera"
 	}
 
-	method actualizar(ave){
-		if(ave.enDestino()){
-			ave.estado(ganadora)
-		} else { 
-			self.verSidebilOAtrapada(ave)
-		}
-		ave.progresar()
+	override method progresar(ave){
 	}
 
-	method progresar(ave){
-
-	}
-
-	method puedeMover(){
-		return true
-	}
-
-	method verSidebilOAtrapada(ave){
-		if(ave.esDebil()){
-			ave.estado(debil)
-		} else {
-			self.verSiAtrapada(ave)
+	override method validarMover(ave, direccion){
+		super(ave, direccion)
+		const destino = direccion.siguientePosicion(ave.position())
+		if (not nivel.existe(destino)) {
+			ave.error("No voy a salir de la pantalla")
 		}
 	}
 
-	method verSiAtrapada(ave){
-		if(ave.atrapada()){
-			ave.estado(atrapada)
-		}
+
+
+	override method puedeMover(ave){
+		return ave.puedeVolar() 
 	}
+
+	override method mensaje(){
+		return "Todo bien"
+	}
+
+
 }
 
-object ganadora{
-	method nombreImagen(){
+object ganadora inherits Estado{
+	override method nombreImagen(){
 		return "destino"
 	}
 
-	method puedeMover(){
-		return false
-	}	
 
-	method mensaje(){
+	override method mensaje(){
 		return "Ya gané!!!"
 	}
 
-	method progresar(ave){
-		ave.finalizar()	
-	}
 }
 
-object atrapada{
-	method nombreImagen(){
+object atrapada inherits Estado {
+	override method nombreImagen(){
 		return "gris"
 	}
 
-	method puedeMover(){
-		return true //false?
-	}	
-
-	method actualizar(ave){
-		if(ave.esDebil()){
-			ave.estado(debil)
-		} else {
-			self.comprobarLibertad(ave)
-		}
+	override method mensaje(){
+		return "Me agarraron"
 	}
-
-	method comprobarLibertad(ave){
-		if(not ave.atrapada()){
-			ave.estado(afuera)
-		}
-	}
-
 }
 
-object debil{
-	method nombreImagen(){
+object debil inherits Estado {
+	override method nombreImagen(){
 		return "gris"
 	}
 
-	method puedeMover(){
-		return false
-	}	
-
-	method mensaje(){
+	override method mensaje(){
 		return "Estoy debil!!!"
-	}
-
-	method progresar(ave){
-		ave.finalizar()	
-	}
+	}	
 }
