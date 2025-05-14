@@ -11,25 +11,20 @@ program pepitaGame {
 	game.addVisual(nido)
 	game.addVisual(silvestre)
 	nivel.configurar()
+	comidas.configurar()
 	game.addVisual(pepita)
+
+	game.addVisual( new Muro( position = game.at(5,5)))
+	game.addVisual( new Muro( position = game.at(6,5)))
+	game.addVisual( new Muro( position = game.at(7,5)))
+
 
 	keyboard.up().onPressDo({pepita.mover(arriba)})	
 	keyboard.left().onPressDo({pepita.mover(izquierda)})
 	keyboard.down().onPressDo({pepita.mover(abajo)})
 	keyboard.right().onPressDo({pepita.mover(derecha)})
-	keyboard.c().onPressDo({pepita.comerEnLugar()}) // pepita.comer(game.uniqueCollider(pepita))
 
-	game.onCollideDo(nido, { ave => ave.cambiarEstado(ganadora) })
-	game.onCollideDo(silvestre, { ave => ave.cambiarEstado(atrapada) })
-	game.onCollideDo(alpiste,{ ave => ave.comerEnLugar()})
-	game.onCollideDo(manzana,{ ave => ave.comerEnLugar()})
-
-
-/*
-	keyboard.j().onPressDo({ game.removeVisual(pepita)
-							 game.addVisual(pepita)})
-*/	
-	//keyboard.c().onPressDo({ game.stop() })
+	game.onCollideDo(pepita, {algo => algo.colision(pepita)} )
 
    	game.start()	
 

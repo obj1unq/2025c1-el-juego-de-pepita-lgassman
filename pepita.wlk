@@ -4,7 +4,6 @@ import direcciones.*
 import comidas.*
 
 object nivel{
-	const comidas = #{alpiste, manzana} 
 	
 	method configurarTablero(){
 		game.title("Pepita") 	//Valor por defecto "Wollok Game"
@@ -26,10 +25,18 @@ object nivel{
 	}
 
 	method configurar(){
-		comidas.forEach({ comida => comida.configurar()})
 		game.onTick(800,self.nombreEventoGravedad(), { pepita.aplicarGravedad()}) //` para agregar gravedad, haciendo que pepita pierda altura cada 800
 	}
 	
+			//nivel.existe(direccion.siguientePosicion(position))
+	method puedeMover(personaje, posicion) {
+		return self.existe(posicion) and self.puedeAtravesar(personaje, posicion)
+	}
+
+	method puedeAtravesar(personaje, posicion) {
+		return game.getObjectsIn(posicion).copyWithout(personaje).all({visual => visual.atravesable()})
+	}
+
 	method existe(posicion)	{
 		return self.existeX(posicion.x()) && self.existeY(posicion.y())
 	}
@@ -56,14 +63,7 @@ object pepita {
 	var property destino = nido
 	var property cazador = silvestre
 	var estado = afuera
-	
-	method comerEnLugar(){
-		const cosaEnPosicion = self.cosaEnPosicion()
 		
-		self.comer(cosaEnPosicion)
-		cosaEnPosicion.cambiarPosicion()
-    }
-	
 	method comer(comida) {
 		energia += comida.energiaQueOtorga()
 	}
@@ -138,7 +138,7 @@ object pepita {
 	}
 
 	method puedeMover(direccion){
-		return estado.puedeMover(self) && nivel.existe(direccion.siguientePosicion(position))
+		return estado.puedeMover(self) && nivel.puedeMover(self, direccion.siguientePosicion(position))
 	}
 
 	method estado(_estado){
@@ -156,8 +156,8 @@ object pepita {
 
 	method aplicarGravedad(){
 		const siguiente = abajo.siguientePosicion(position)
-		if(nivel.existe(siguiente)){
-			position = abajo.siguientePosicion(position)
+		if(nivel.puedeMover(self, siguiente)){
+			position = siguiente
 		}
 	}
 }
