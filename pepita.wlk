@@ -17,12 +17,17 @@ object nivel{
 	}
 
 	method finalizar(){
+		game.removeTickEvent(self.nombreEventoGravedad())
 		game.schedule(2000, { game.stop() })
+	}
+
+	method nombreEventoGravedad() {
+		return "gravedad" + self.identity()
 	}
 
 	method configurar(){
 		comidas.forEach({ comida => comida.configurar()})
-		game.onTick(800,"gravedad" + pepita.identity(), { pepita.aplicarGravedad()}) //` para agregar gravedad, haciendo que pepita pierda altura cada 800
+		game.onTick(800,self.nombreEventoGravedad(), { pepita.aplicarGravedad()}) //` para agregar gravedad, haciendo que pepita pierda altura cada 800
 	}
 	
 	method existe(posicion)	{
@@ -46,8 +51,8 @@ object nivel{
 }
 
 object pepita {
-	var energia = 100
-	var position = game.at(8, 2)
+	var energia = 300
+	var position = game.at(1, 5)
 	var property destino = nido
 	var property cazador = silvestre
 	var estado = afuera
@@ -68,6 +73,7 @@ object pepita {
 	}
 
 	method volar(kms) {
+		self.validarVolar(1)
 		energia -= self.energiaNecesaria(kms)
 	}
 	
@@ -82,7 +88,7 @@ object pepita {
 	method image() = "pepita-" + estado.nombreImagen() + ".png"
 
 	method validarVolar(distancia){
-		if(not self.puedeVolar()){
+		if(not self.puedeVolar(distancia)){
 			self.error("No puede volar!")
 		}
 	}
@@ -91,8 +97,8 @@ object pepita {
 		return position.x()
 	}
 
-	method puedeVolar() {
-		return true
+	method puedeVolar(distancia) {
+		return energia >= self.energiaNecesaria(distancia)
 	}
 
 	method mensajeError(){ 
@@ -120,7 +126,9 @@ object pepita {
 		self.validarMover(direccion)
 		self.volar(1)
 		position = direccion.siguientePosicion(position)
-		estado.actualizar(self)	
+		if (not self.puedeVolar(1)) {
+			self.cambiarEstado(debil)
+		}
 	}
 
 	method validarMover(direccion){
@@ -130,24 +138,20 @@ object pepita {
 	}
 
 	method puedeMover(direccion){
-		return estado.puedeMover() && nivel.existe(direccion.siguientePosicion(position))
-	}
-
-	method esDebil(){
-		return energia <= 0
+		return estado.puedeMover(self) && nivel.existe(direccion.siguientePosicion(position))
 	}
 
 	method estado(_estado){
 		estado = _estado
 	}
 
-	method energiaNecesaria(kms){
-		return 8 + kms
+	method cambiarEstado(_estado) {
+		self.estado(_estado)
+		estado.iniciar(self)
 	}
 
-	method finalizar(){
-		game.say(self, estado.mensaje())
-		nivel.finalizar()
+	method energiaNecesaria(kms){
+		return 8 + kms
 	}
 
 	method aplicarGravedad(){
@@ -158,100 +162,73 @@ object pepita {
 	}
 }
 
-object afuera{
-	method nombreImagen(){
+
+class Estado {
+	
+	method nombreImagen()
+
+	method puedeMover(ave){
+		return false
+	}	
+
+	method mensaje()
+
+	method iniciar(ave){
+		game.say(self, self.mensaje())
+		nivel.finalizar()
+	}
+}
+
+object afuera inherits  Estado {
+	
+	override method nombreImagen(){
 		return "afuera"
 	}
 
-	method actualizar(ave){
-		if(ave.enDestino()){
-			ave.estado(ganadora)
-		} else { 
-			self.verSidebilOAtrapada(ave)
-		}
-		ave.progresar()
-	}
-
-	method progresar(ave){
+	override method iniciar(ave){
 
 	}
 
-	method puedeMover(){
-		return true
+	override method puedeMover(ave){
+		return ave.puedeVolar(1)
 	}
 
-	method verSidebilOAtrapada(ave){
-		if(ave.esDebil()){
-			ave.estado(debil)
-		} else {
-			self.verSiAtrapada(ave)
-		}
+	override method mensaje() {
+		return "Comienza el juego"
 	}
+} 
 
-	method verSiAtrapada(ave){
-		if(ave.atrapada()){
-			ave.estado(atrapada)
-		}
-	}
-}
 
-object ganadora{
-	method nombreImagen(){
+object ganadora inherits Estado {
+	override method nombreImagen(){
 		return "destino"
 	}
 
-	method puedeMover(){
-		return false
-	}	
-
-	method mensaje(){
+	override method mensaje(){
 		return "Ya gané!!!"
 	}
 
-	method progresar(ave){
-		ave.finalizar()	
-	}
 }
 
-object atrapada{
-	method nombreImagen(){
+object atrapada inherits Estado {
+	override method nombreImagen(){
 		return "gris"
 	}
-
-	method puedeMover(){
-		return true //false?
-	}	
-
-	method actualizar(ave){
-		if(ave.esDebil()){
-			ave.estado(debil)
-		} else {
-			self.comprobarLibertad(ave)
-		}
-	}
-
-	method comprobarLibertad(ave){
-		if(not ave.atrapada()){
-			ave.estado(afuera)
-		}
+	
+	override method mensaje() {
+		return "Me agarraron"
 	}
 
 }
 
-object debil{
-	method nombreImagen(){
+object debil inherits Estado {
+	override method nombreImagen(){
 		return "gris"
 	}
 
-	method puedeMover(){
-		return false
-	}	
 
-	method mensaje(){
+	override method mensaje(){
 		return "Estoy debil!!!"
 	}
 
-	method progresar(ave){
-		ave.finalizar()	
-	}
 }

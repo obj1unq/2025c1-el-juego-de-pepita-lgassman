@@ -19,6 +19,12 @@ program pepitaGame {
 	keyboard.right().onPressDo({pepita.mover(derecha)})
 	keyboard.c().onPressDo({pepita.comerEnLugar()}) // pepita.comer(game.uniqueCollider(pepita))
 
+	game.onCollideDo(nido, { ave => ave.cambiarEstado(ganadora) })
+	game.onCollideDo(silvestre, { ave => ave.cambiarEstado(atrapada) })
+	game.onCollideDo(alpiste,{ ave => ave.comerEnLugar()})
+	game.onCollideDo(manzana,{ ave => ave.comerEnLugar()})
+
+
 /*
 	keyboard.j().onPressDo({ game.removeVisual(pepita)
 							 game.addVisual(pepita)})
