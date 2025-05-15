@@ -8,12 +8,9 @@ class Visual {
 }
 
 object nido inherits Visual {
-    const position = game.at(7,8)
+    var property position = game.at(7,8)
 
-    method position () {
-        return position
-    }
-
+  
     method image(){
         return "nido.png"
     }
@@ -53,7 +50,7 @@ class Muro inherits Visual {
     method image() {
         return "muro.png"
     }
-    
+
     override method atravesable() {
         return false
     }

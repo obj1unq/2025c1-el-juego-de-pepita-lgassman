@@ -5,15 +5,6 @@ import comidas.*
 
 object nivel{
 	
-	method configurarTablero(){
-		game.title("Pepita") 	//Valor por defecto "Wollok Game"
-		game.height(10) 		//valor por defecto 5
-		game.width(10) 			//valor por defecto 5
-		game.cellSize(50) 		//valor por defecto 50
-		//search assets in assets folder, for example, for the background
-		//game.ground("fondo.jpg") //Este pone la imagen de fondo en cada celda.
-		game.boardGround("fondo.jpg")
-	}
 
 	method finalizar(){
 		game.removeTickEvent(self.nombreEventoGravedad())
