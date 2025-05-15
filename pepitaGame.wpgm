@@ -1,0 +1,26 @@
+import wollok.game.*
+
+import pepita.*
+import comidas.*
+import extras.*
+import direcciones.*
+import tablero.*
+
+program pepitaGame {
+	tablero.configurar()
+
+	nivel.configurar()
+	comidas.configurar()
+
+
+	keyboard.up().onPressDo({pepita.mover(arriba)})	
+	keyboard.left().onPressDo({pepita.mover(izquierda)})
+	keyboard.down().onPressDo({pepita.mover(abajo)})
+	keyboard.right().onPressDo({pepita.mover(derecha)})
+
+	game.onCollideDo(pepita, {algo => algo.colision(pepita)} )
+
+   	game.start()	
+
+	
+}

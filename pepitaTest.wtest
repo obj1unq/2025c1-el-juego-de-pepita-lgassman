@@ -1,0 +1,15 @@
+import pepita.*
+import comidas.*
+
+describe "Tests de Pepita" {
+
+
+	test "Al comer pepita aumenta su energia" {
+		pepita.comer( new Manzana())
+		assert.equals(305, pepita.energia())
+	}
+
+
+
+}
+
